@@ -18,10 +18,11 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 #define threadCount 10 /* Maximum number of threads*/
-#define eps .005
+
 #define RELEASE_TIME_P1 4
 #define RELEASE_TIME_P2 2
 #define RELEASE_TIME_P3 0
+
 #define PRIORITY_P1	0.7
 #define PRIORITY_P2	0.6
 #define PRIORITY_P3	0.5
@@ -47,26 +48,29 @@ void * P1(void* arg)
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
+		printf("\nP1: waiting for activation");
 		while(active_p != 1)
+		{
 			pthread_cond_wait(&cond, &mutex);
+			printf("\nP1: notified, counter: %d", cnt);
+		}
 
-		cout << "P1 started";
 		if(cnt == 1)
 		{
 			// Try to acquire mutex after running for 1 unit
-			cout << ".....Attempting to Lock Semaphore ..";
+			printf("\nP1: Attempt to lock semaphore");
 			piMutex[0].lock(1);
 		}
 		else if(cnt == 3)
 		{
 			// Release mutex after running for 3 units
-			cout << ".....Unlocking Semaphore ..";
+			printf("\nP3: Unlocking semaphore");
 			piMutex[0].unlock(1);
 		}
 		else if (cnt == 4)
 		{
 			// Terminate after 4 units
-			cout << "P1 completed.........";
+			printf("\nP3: Execution completed");
 
 			// remove 1st process from the ThreadManager's queue
 			priority[1] = 0;
@@ -93,13 +97,16 @@ void * P2(void* arg)
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
+		printf("\nP1: waiting for activation");
 		while (active_p != 2)
+		{
 			pthread_cond_wait(&cond, &mutex);
+			printf("\nP2: notified, counter: %d", cnt);
+		}
 
-		cout << "P2 started ...";
 		if (cnt == 6)
 		{
-			cout << "P2 completed ...";
+			printf("\nP3: Execution completed");
 
 			// remove 1st process from the ThreadManager's queue
 			priority[2] = 0;
@@ -120,29 +127,32 @@ void * P2(void* arg)
 //-----------------------------------------------------------------------------------------
 void * P3(void* arg)
 {
-	int cnt=0;
+	int cnt = 0;
 	while(1)
 	{
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
-		while(active_p != 3);
-			pthread_cond_wait(&cond,&mutex);
-
-		cout << "P3 started ...";
-		if(cnt == 1)
+		printf("\nP3: waiting for activation");
+		while (active_p != 3);
 		{
-			cout << "Attempting to Lock Semaphore ..";
+			pthread_cond_wait(&cond, &mutex);
+			printf("\nP3: notified, counter: %d", cnt);
+		}
+
+		if (cnt == 1)
+		{
+			printf("\nP3: Attempt to lock semaphore");
 			piMutex[0].lock(3);
 		}
-		else if(cnt==3)
+		else if (cnt == 3)
 		{
-			cout << ".....Unlocking Semaphore ..";
+			printf("\nP3: Unlocking semaphore");
 			piMutex[0].unlock(3);
 		}
 		else if (cnt == 5)
 		{
-			cout << "P3 completed ...";
+			printf("\nP3: Execution completed");
 
 			// remove 1st process from the ThreadManager's queue
 			priority[3] = 0;
@@ -164,23 +174,26 @@ void * P3(void* arg)
 //-----------------------------------------------------------------------------------------
 void ThreadManager()
 {
-	float p;
-	int i;
-
-	pthread_mutex_lock(&mutex);
+//	if (pthread_mutex_trylock(&mutex) != 0)
+//		cout << "error locking mutex" << endl;
+//
+//	pthread_mutex_lock(&mutex);
 
 	// find thread with the highest priority and flag it as active
-	p =- 1;
-	for(i = 1; i < threadCount; i++)
+	int p =- 1;
+	for (int i = 1; i < threadCount; i++)
 	{
-		if(priority[i] > p)
+		if (priority[i] > p)
 		{
 			active_p = i;
 			p = priority[i];
 		}
 	}
 
-	pthread_mutex_unlock(&mutex);
+	printf("\nActivate thread %d", active_p);
+
+//	pthread_mutex_unlock(&mutex);
+	printf("\nNotify threads");
 	pthread_cond_broadcast(&cond); // notify threads
 }
 
@@ -193,47 +206,53 @@ int main(void)
 	pthread_t P1_ID, P2_ID, P3_ID;
 
 	// create and start periodic timer to generate pulses every second.
-	PulseTimer* timer = new PulseTimer(1, 0);
+	PulseTimer* timer = new PulseTimer(1);
 	timer->start();
 
-	int cnt=0;
+	int cnt = 0;
 	while(1)
 	{
 		//--------------------------------------------
 		pthread_mutex_lock(&mutex);
-		 // release P1 t= 4
+		// release P1 t = 4
 		if(cnt == RELEASE_TIME_P1)
 		{
-			priority[1] = PRIORITY_P1;
+			priority[1] = PRIORITY_P1;	// 0.7
 			pthread_create(&P1_ID, NULL, P1, NULL);
+			printf("\nP1 released");
 		}
-		 // release P2 at t=2
+		// release P2 at t = 2
 		if(cnt == RELEASE_TIME_P2)
 		{
-			priority[2] = PRIORITY_P2;
+			priority[2] = PRIORITY_P2;	// 0.6
 			pthread_create(&P2_ID, NULL, P2, NULL);
+			printf("\nP2 released");
 		}
-		 // release P3 at t=0
+		// release P3 at t = 0
 		if(cnt == RELEASE_TIME_P3)
 		{
-			priority[3] = PRIORITY_P3;
+			priority[3] = PRIORITY_P3;	// 0.5
 			pthread_create(&P3_ID, NULL, P3, NULL);
+			printf("\nP3 released");
 		}
-		 // terminate the program at t=30
+		 // terminate the program at t = 30
 		if (cnt == 30)
+		{
+			printf("\n30 seconds are over, terminate program");
 			break;
+		}
 
-		pthread_mutex_unlock(&mutex);
+		if (pthread_mutex_unlock(&mutex) != 0)
+			printf("\nP1: error unlocking mutex, line 237");
 
 		// wait for the timer pulse to fire
 		timer->wait();
 
 		// message
-		cout << endl << "tick=" << cnt << /*", active_p="<<active_p<<*/ "->";
+		printf("\n timer tick: %d", cnt + 1);
 
 		// determine active thread and run it
 		ThreadManager();
-
 		cnt++;
 	}
 
@@ -241,4 +260,3 @@ int main(void)
 	timer->stop();
 	delete timer;
 }
-

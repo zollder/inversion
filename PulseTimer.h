@@ -24,7 +24,7 @@ class PulseTimer
 	public:
 
 		// constructor
-		PulseTimer(double, int);
+		PulseTimer(double);
 
 		// destructor
 		~PulseTimer();

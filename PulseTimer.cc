@@ -8,12 +8,15 @@
 	//-----------------------------------------------------------------------------------------
 	// Constructor
 	//-----------------------------------------------------------------------------------------
-	PulseTimer::PulseTimer(double interval, int channelId)
+	PulseTimer::PulseTimer(double interval)
 	{
 		printf("Creating and initializing PulseTimer ...\n");
 
+		// create and set channel id
+		setChannelId(createChannel());
+
 		// connect client to the channel
-		connectionAttach(channelId);
+		connectionAttach(getChannelId());
 
 		// convert interval to seconds and nanoseconds and initialize corresponding members
 		setInterval(interval);
@@ -22,8 +25,6 @@
 		createTimer();
 
 		setRunning(false);
-
-		setChannelId(createChannel());
 	}
 
 	//-----------------------------------------------------------------------------------------
