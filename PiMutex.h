@@ -51,40 +51,37 @@ class PiMutex
 		{
 			int lockStatus = pthread_mutex_trylock(&piMutex);
 
-			if (lockStatus == 0)	// if unlocked
+			// if unlocked
+			if (lockStatus == 0)
 			{
-				printf("\nPiMutex: locking critical section");
+				printf("\nPiMutex: locking CS");
 				maxPriorityThreadPtr = currentThreadPriority;
+
 				if (csPriority > *currentThreadPriority)
 				{
-					printf("\nPiMutex: Increasing thread's priority to %f", csPriority);
+					printf("\nPiMutex: set thread's priority to %f", csPriority);
 					*currentThreadPriority = csPriority;
 				}
 				else
 				{
-					printf("\nPiMutex: Increasing critical section priority to %f", *currentThreadPriority);
+					printf("\nPiMutex: inherit priority %f", *currentThreadPriority);
 					csPriority = *currentThreadPriority;
 				}
-				return lockStatus;
 			}
-			else if (lockStatus == 16 && csPriority < *currentThreadPriority)	// if locked
+			// if already locked by lower priority thread
+			else if (lockStatus == 16 && csPriority < *currentThreadPriority)
 			{
-				printf("\nPiMutex: critical section already locked, updating CS and threads priorities");
+				printf("\nPiMutex: CS already locked, inherit and swap priorities");
 
 				*maxPriorityThreadPtr = *currentThreadPriority;
-				printf("\nPiMutex: new lockingThreadPtr value: %f", *maxPriorityThreadPtr);
-
 				*currentThreadPriority = csPriority;
-				printf("\nPiMutex: old lockingThreadPtr value: %f", *currentThreadPriority);
-
 				csPriority = *maxPriorityThreadPtr;
-				printf("\nPiMutex: updated critical section priority: %f", csPriority);
-
 				maxPriorityThreadPtr = currentThreadPriority;
-				return lockStatus;
-			}
 
-			printf("\nPiMutex: locking error");
+			}
+			else
+				printf("\nPiMutex: lock error");
+
 			return lockStatus;
 		}
 
@@ -112,7 +109,6 @@ class PiMutex
 				printf("\nPiMutex: recovering thread's priority");
 				*maxPriorityThreadPtr = csPriority;
 			}
-
 
 			return unlockStatus;
 		}

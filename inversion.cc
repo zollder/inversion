@@ -29,14 +29,13 @@ pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 float priority[threadCount] = {0};	// priority of threads
 int active_p = 0;					// detemine the active thread that should be run
-bool scheduler_active = true;		// shceduler condition variable
 
 void ThreadManager();
 
 //-----------------------------------------------------------------------------------------
-// Instantiates an array of "Priority Inheritance" mutexes (one for each thread).
+// Instantiates a "Priority Inheritance" mutex.
 //-----------------------------------------------------------------------------------------
-PiMutex piMutex; // mutexes are instantiated here
+PiMutex piMutex;
 
 //-----------------------------------------------------------------------------------------
 // Thread 1 (highest priority)
@@ -46,30 +45,29 @@ void * P1(void* arg)
 	int cnt = 0;
 	while(1)
 	{
-		printf("\nP1: lock mutex");
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
-		printf("\nP1: waiting for activation, priority: %f", priority[1]);
+		printf("\nP1: suspended, priority: %f", priority[1]);
 		while (active_p != 1)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP1: start execution, counter: %d", cnt);
+		printf("\nP1: executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 1)
 		{
 			// Try to acquire mutex after running for 1 unit
-			printf("\nP1: attempt to lock semaphore, thread blocked");
-			piMutex.lock(&priority[1]);
-			printf("\nP1: semaphore locked, thread unblocked");
+			printf("\nP1: try CS lock");
+			if (piMutex.lock(&priority[1]) == 16);
+				printf("\nP1: blocked, CS already locked");
 		}
 		else if (cnt == 3)
 		{
 			// Release mutex after running for 3 units
 			printf("\nP1: unlocking semaphore");
 			piMutex.unlock(&priority[1], PRIORITY_P1);
-			printf("\nP1: semaphore unlocked, thread suspended");
+			printf("\nP1: semaphore unlocked");
 		}
 		else if (cnt == 4)
 		{
@@ -79,21 +77,11 @@ void * P1(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[1] = 0;
 
-//			printf("\nP1: notify scheduler");
-//			scheduler_active = true;
-//			pthread_cond_signal(&cond);
-
-			printf("\nP1: unlock mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
-		printf("\nP1: executed, counter: %d", cnt);
+		printf("\nP1: executed, cnt: %d", cnt);
 
-//		printf("\nP1: notify scheduler");
-//		scheduler_active = true;
-//		pthread_cond_signal(&cond);
-
-		printf("\nP1: unlock mutex");
 		pthread_mutex_unlock(&mutex);
 		cnt++;
 	}
@@ -109,15 +97,14 @@ void * P2(void* arg)
 	int cnt = 0;
 	while(1)
 	{
-		printf("\nP2: lock mutex");
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
-		printf("\nP2: waiting for activation, priority: %f", priority[2]);
+		printf("\nP2: suspended, priority: %f", priority[2]);
 		while (active_p != 2)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP2: start execution, counter: %d", cnt);
+		printf("\nP2: executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 6)
@@ -127,21 +114,11 @@ void * P2(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[2] = 0;
 
-//			printf("\nP2: notify scheduler");
-//			scheduler_active = true;
-//			pthread_cond_signal(&cond);
-
-			printf("\nP2: unlock mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
-		printf("\nP2: executed, counter: %d", cnt);
+		printf("\nP2: executed, cnt: %d", cnt);
 
-//		printf("\nP2: notify scheduler");
-//		scheduler_active = true;
-//		pthread_cond_signal(&cond);
-
-		printf("\nP2: unlock mutex");
 		pthread_mutex_unlock(&mutex);
 		cnt++;
 	}
@@ -161,24 +138,24 @@ void * P3(void* arg)
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
-		printf("\nP3: waiting for activation, priority: %f", priority[3]);
+		printf("\nP3: suspended, priority: %f", priority[3]);
 		while (active_p != 3)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP3: start execution, counter: %d", cnt);
+		printf("\nP3: executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 1)
 		{
-			printf("\nP3: attempt to lock semaphore, thread blocked");
+			printf("\nP3: locking CS");
 			piMutex.lock(&priority[3]);
-			printf("\nP3: semaphore locked, thread unblocked");
+			printf("\nP3: CS locked");
 		}
 		else if (cnt == 3)
 		{
-			printf("\nP3: unlocking semaphore");
+			printf("\nP3: unlocking CS");
 			piMutex.unlock(&priority[3], PRIORITY_P3);
-			printf("\nP3: semaphore unlocked, thread suspended");
+			printf("\nP3: CS unlocked");
 		}
 		else if (cnt == 5)
 		{
@@ -187,22 +164,11 @@ void * P3(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[3] = 0;
 
-
-//			printf("\nP3: notify scheduler");
-//			scheduler_active = true;
-//			pthread_cond_signal(&cond);
-
-			printf("\nP3: unlock mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
 		printf("\nP3: executed, counter: %d", cnt);
 
-//		printf("\nP3: notify scheduler");
-//		scheduler_active = true;
-//		pthread_cond_signal(&cond);
-
-		printf("\nP3: unlock mutex");
 		pthread_mutex_unlock(&mutex);
 
 		cnt++;
@@ -249,14 +215,7 @@ int main(void)
 	while(1)
 	{
 		//--------------------------------------------
-		printf("\nScheduler: lock mutex");
 		pthread_mutex_lock(&mutex);
-
-//		while (!scheduler_active)
-//			pthread_cond_wait( &cond, &mutex );
-
-		printf("\nScheduler: resumed");
-		scheduler_active = false;
 
 		// release P1 t = 4
 		if(cnt == RELEASE_TIME_P1)
@@ -288,7 +247,6 @@ int main(void)
 
 		threadManager();
 
-		printf("\nScheduler: unlock mutex");
 		pthread_mutex_unlock(&mutex);
 
 		// wait for the timer pulse to fire
