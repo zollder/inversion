@@ -36,7 +36,7 @@
 	//-----------------------------------------------------------------------------------------
 	PulseTimer::~PulseTimer()
 	{
-		printf("Destroying PulseTimer ...\n");
+		printf("\n\nDestroying PulseTimer ...\n");
 
 		// detaches the connection
 		if (ConnectDetach(getConnectionId()) < 0)

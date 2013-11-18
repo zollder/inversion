@@ -1,7 +1,7 @@
 #include <pthread.h>
 
-#ifndef mutex_h
-#define mutex_h
+#ifndef PiMutex_h
+#define PiMutex_h
 
 //-----------------------------------------------------------------------------------------
 // PiMutex (Priority Inheritance Mutex) class definition and implementation.
@@ -20,8 +20,7 @@ class PiMutex
 		{
 			printf("Initializing piMutex ...\n");
 			pthread_mutex_init(&piMutex, NULL);
-			currentPriority = -1;
-			inherited = false;
+			csPriority = 0;
 		}
 
 		//-----------------------------------------------------------------------------------------
@@ -36,40 +35,95 @@ class PiMutex
 		}
 
 		//-----------------------------------------------------------------------------------------
-		// Locks piMutex, returns 0 (success) or error code (failure).
+		// Locks piMutex. Returns 0 (success) or error code (failure).
 		//-----------------------------------------------------------------------------------------
-		int lock(int priority)
+		int lock()
 		{
-			// update current priority
-			if (currentPriority < priority)
-				currentPriority = priority;
-
-			return pthread_mutex_lock(&piMutex);
+			int lockStatus = pthread_mutex_lock(&piMutex);
+			return lockStatus;
 		}
 
 		//-----------------------------------------------------------------------------------------
-		// Unlocks piMutex, returns 0 (success) or error code (failure).
+		// Locks piMutex for critical section with highest known thread priority.
+		// Returns 0 (success) or error code (failure).
 		//-----------------------------------------------------------------------------------------
-		int unlock(int priority)
+		int lock(float *currentThreadPriority)
 		{
-			return pthread_mutex_unlock(&piMutex);
+			int lockStatus = pthread_mutex_trylock(&piMutex);
+
+			if (lockStatus == 0)	// if unlocked
+			{
+				printf("\nPiMutex: locking critical section");
+				maxPriorityThreadPtr = currentThreadPriority;
+				if (csPriority > *currentThreadPriority)
+				{
+					printf("\nPiMutex: Increasing thread's priority to %f", csPriority);
+					*currentThreadPriority = csPriority;
+				}
+				else
+				{
+					printf("\nPiMutex: Increasing critical section priority to %f", *currentThreadPriority);
+					csPriority = *currentThreadPriority;
+				}
+				return lockStatus;
+			}
+			else if (lockStatus == 16 && csPriority < *currentThreadPriority)	// if locked
+			{
+				printf("\nPiMutex: critical section already locked, updating CS and threads priorities");
+
+				*maxPriorityThreadPtr = *currentThreadPriority;
+				printf("\nPiMutex: new lockingThreadPtr value: %f", *maxPriorityThreadPtr);
+
+				*currentThreadPriority = csPriority;
+				printf("\nPiMutex: old lockingThreadPtr value: %f", *currentThreadPriority);
+
+				csPriority = *maxPriorityThreadPtr;
+				printf("\nPiMutex: updated critical section priority: %f", csPriority);
+
+				maxPriorityThreadPtr = currentThreadPriority;
+				return lockStatus;
+			}
+
+			printf("\nPiMutex: locking error");
+			return lockStatus;
 		}
 
 		//-----------------------------------------------------------------------------------------
-		// Returns inheritance status of the priority.
+		// Unlocks piMutex. Returns 0 (success) or error code (failure).
 		//-----------------------------------------------------------------------------------------
-		bool isInherited()
+		int unlock()
 		{
-			return inherited;
+			int unlockStatus = pthread_mutex_unlock(&piMutex);
+			return unlockStatus;
+		}
+
+		//-----------------------------------------------------------------------------------------
+		// Unlocks piMutex and restores thread's priority to its original value, returns 0 (success) or error code (failure).
+		// Restores original thread's priority
+		//-----------------------------------------------------------------------------------------
+		int unlock(float *currentThreadPriority, float originalThreadPriority)
+		{
+			int unlockStatus = pthread_mutex_unlock(&piMutex);
+
+			*currentThreadPriority = originalThreadPriority;
+
+			if (unlockStatus == 0)
+			{
+				printf("\nPiMutex: recovering thread's priority");
+				*maxPriorityThreadPtr = csPriority;
+			}
+
+
+			return unlockStatus;
 		}
 
 	//-----------------------------------------------------------------------------------------
 	// Private members
 	//-----------------------------------------------------------------------------------------
 	private:
-		pthread_mutex_t  piMutex;
-		int currentPriority;
-		bool inherited;
+		pthread_mutex_t piMutex;
+		float csPriority;
+		float *maxPriorityThreadPtr;
 };
 
 #endif
