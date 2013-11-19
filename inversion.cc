@@ -52,7 +52,7 @@ void * P1(void* arg)
 		while (active_p != 1)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP1: executing, cnt: %d", cnt);
+		printf("\nP1: resumed, executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 1)
@@ -66,7 +66,7 @@ void * P1(void* arg)
 		{
 			// Release mutex after running for 3 units
 			printf("\nP1: unlocking semaphore");
-			piMutex.unlock(&priority[1], PRIORITY_P1);
+			piMutex.unlock(&priority[1]);
 			printf("\nP1: semaphore unlocked");
 		}
 		else if (cnt == 4)
@@ -104,7 +104,7 @@ void * P2(void* arg)
 		while (active_p != 2)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP2: executing, cnt: %d", cnt);
+		printf("\nP2: resumed, executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 6)
@@ -142,7 +142,7 @@ void * P3(void* arg)
 		while (active_p != 3)
 			pthread_cond_wait(&cond, &mutex);
 
-		printf("\nP3: executing, cnt: %d", cnt);
+		printf("\nP3: resumed, executing, cnt: %d", cnt);
 		active_p = 0;
 
 		if (cnt == 1)
@@ -154,7 +154,7 @@ void * P3(void* arg)
 		else if (cnt == 3)
 		{
 			printf("\nP3: unlocking CS");
-			piMutex.unlock(&priority[3], PRIORITY_P3);
+			piMutex.unlock(&priority[3]);
 			printf("\nP3: CS unlocked");
 		}
 		else if (cnt == 5)
