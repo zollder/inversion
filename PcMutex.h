@@ -1,7 +1,8 @@
 #include <pthread.h>
+#include <list>
 
-#ifndef mutex_h
-#define mutex_h
+#ifndef PcMutex_h
+#define PcMutex_h
 
 //-----------------------------------------------------------------------------------------
 // PcMutex (Priority Ceiling Mutex) class definition and implementation.
@@ -10,16 +11,30 @@
 class PcMutex
 {
 	//-----------------------------------------------------------------------------------------
+	// Thread priority data holder
+	//-----------------------------------------------------------------------------------------
+	struct ThreadInfo
+	{
+		float *threadPtr;
+		float nativePriority;
+	};
+
+	//-----------------------------------------------------------------------------------------
 	// Public members
 	//-----------------------------------------------------------------------------------------
 	public:
 		//-----------------------------------------------------------------------------------------
-		// Constructor (initializes PC mutex)
+		// Constructor (initializes pcMutex)
 		//-----------------------------------------------------------------------------------------
-		PcMutex()
+		PcMutex(float priority)
 		{
-			printf("Initializing PC mutex ...\n");
+			printf("Initializing pcMutex ...\n");
 			pthread_mutex_init(&pcMutex, NULL);
+			history = new list<ThreadInfo>;
+
+			// Sets critical section (resource) priority to that of highest priority thread
+			// among those using the resource. Should be determined in advance with static analysis.
+			csPriority = priority;
 		}
 
 		//-----------------------------------------------------------------------------------------
@@ -27,33 +42,111 @@ class PcMutex
 		//-----------------------------------------------------------------------------------------
 		virtual ~PcMutex()
 		{
-			printf("Destroying PC mutex ...\n");
+			printf("Destroying pcMutex ...\n");
 			int status = pthread_mutex_destroy(&pcMutex);
 			if (status != 0)
-				printf("Error destroying PC mutex");
+				printf("Error destroying pcMutex");
+			delete history;
 		}
 
 		//-----------------------------------------------------------------------------------------
-		// Locks PC mutex, returns 0 (success) or error code (failure).
+		// Locks pcMutex for critical section.
+		// Hoist task priority to that of critical section (determined in advance by static analysis)
+		// Keeps references (history) to suspended tasks, as manager doesn't provide this functionality.
+		// Returns 0 (success) or error code (failure).
 		//-----------------------------------------------------------------------------------------
-		int lock()
+		int lock(float *priorityPtr)
 		{
-			return pthread_mutex_lock(&pcMutex);
+			int lockStatus = pthread_mutex_trylock(&pcMutex);
+
+			// if locked successfully
+			if (lockStatus == 0)
+			{
+				printf("\nPcMutex: locking CS");
+
+				printf("\nPcMutex: saving thread's state");
+				ThreadInfo threadData;
+				threadData.threadPtr = priorityPtr;
+				threadData.nativePriority = *priorityPtr;
+				history->push_front(threadData);
+
+				printf("\nPcMutex: inheriting CS's priority: %f", csPriority);
+				*priorityPtr = csPriority;
+			}
+			// if was already locked
+			else if (lockStatus == 16)
+			{
+				printf("\nPcMutex: CS already locked");
+
+				printf("\nPcMutex: saving thread's state");
+				ThreadInfo threadData;
+				threadData.threadPtr = priorityPtr;
+				threadData.nativePriority = *priorityPtr;
+				history->push_front(threadData);
+
+				printf("\nPcMutex: suspend thread");
+				*priorityPtr = 0;	// set its priority to 0
+			}
+			else
+				printf("\nPcMutex: something weird happened");
+
+			return lockStatus;
 		}
 
 		//-----------------------------------------------------------------------------------------
-		// Unlocks PC mutex, returns 0 (success) or error code (failure).
+		// Unlocks pcMutex and restores thread priorities to their original values.
+		// This also resumes suspended priorities (with priority set to 0).
 		//-----------------------------------------------------------------------------------------
-		int unlock()
+		int unlock(float *currentThreadPriority)
 		{
-			return pthread_mutex_unlock(&pcMutex);
+			int unlockStatus = pthread_mutex_unlock(&pcMutex);
+
+			if (unlockStatus == 0)
+			{
+				printf("\nPcMutex: unlocking CS, recovering priorities, resuming suspended threads");
+				while(!history->empty())
+				{
+					// recover native priorities (also resumes suspended threads)
+					*(history->front().threadPtr) = history->front().nativePriority;
+					history->pop_front();
+				}
+			}
+
+			return unlockStatus;
 		}
+
+		//-----------------------------------------------------------------------------------------
+		// Sets critical section (resource) priority.
+		// CS priority should be known/determined before the mutex object is created.
+		//-----------------------------------------------------------------------------------------
+//		int setCsPriority(float maxPriority)
+//		{
+//			int unlockStatus = pthread_mutex_unlock(&pcMutex);
+//
+//			if (unlockStatus == 0)
+//			{
+//				printf("\nPcMutex: unlocked, recovering priorities, resuming suspended threads");
+//				while(!history->empty())
+//				{
+//					// recover native priorities (also resumes suspended threads)
+//					*(history->front().threadPtr) = history->front().nativePriority;
+//					history->pop_front();
+//
+//					// reset CS priority
+//					csPriority = 0;
+//				}
+//			}
+//
+//			return unlockStatus;
+//		}
 
 	//-----------------------------------------------------------------------------------------
 	// Private members
 	//-----------------------------------------------------------------------------------------
 	private:
-		pthread_mutex_t  pcMutex;
+		pthread_mutex_t pcMutex;
+		list<ThreadInfo> *history;
+		float csPriority;
 };
 
 #endif

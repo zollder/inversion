@@ -51,50 +51,50 @@ class PiMutex
 		// Keeps references to priority donors (history).
 		// Returns 0 (success) or error code (failure).
 		//-----------------------------------------------------------------------------------------
-		int lock(float *currentThreadPriorityPtr)
+		int lock(float *priorityPtr)
 		{
 			int lockStatus = pthread_mutex_trylock(&piMutex);
 
-			// if unlocked
+			// if locked successfully
 			if (lockStatus == 0)
 			{
 				printf("\nPiMutex: locking CS");
 
 				// keep reference to the locking thread's priority
 				ThreadInfo threadData;
-				threadData.threadPtr = currentThreadPriorityPtr;
-				threadData.nativePriority = csPriority;
+				threadData.threadPtr = priorityPtr;
+				threadData.nativePriority = *priorityPtr;
 				history->push_front(threadData);
 
-				if (csPriority > *currentThreadPriorityPtr)
+				if (csPriority > *priorityPtr)
 				{
-					printf("\nPiMutex: inherit CS priority: %f", *currentThreadPriorityPtr);
-					*currentThreadPriorityPtr = csPriority;
+					printf("\nPiMutex: inherit CS priority: %f", *priorityPtr);
+					*priorityPtr = csPriority;
 				}
 				else
 				{
-					printf("\nPiMutex: update CS priority to: %f", *currentThreadPriorityPtr);
-					csPriority = *currentThreadPriorityPtr;
+					printf("\nPiMutex: update CS priority to: %f", *priorityPtr);
+					csPriority = *priorityPtr;
 				}
 
 			}
 			// if already locked by lower priority thread
-			else if (lockStatus == 16 && csPriority < *currentThreadPriorityPtr)
+			else if (lockStatus == 16 && csPriority < *priorityPtr)
 			{
-				printf("\nPiMutex: CS already locked, inherit priority: %f", *currentThreadPriorityPtr);
+				printf("\nPiMutex: CS already locked, inherit priority: %f", *priorityPtr);
 
 				// update CS and locking thread's priority to that of the attempting thread
-				csPriority = *currentThreadPriorityPtr;
-				*(history->back().threadPtr) = *currentThreadPriorityPtr;
+				csPriority = *priorityPtr;
+				*(history->back().threadPtr) = *priorityPtr;
 
 				// keep reference to the suspended thread's priority
 				ThreadInfo threadData;
-				threadData.threadPtr = currentThreadPriorityPtr;
-				threadData.nativePriority = *currentThreadPriorityPtr;
+				threadData.threadPtr = priorityPtr;
+				threadData.nativePriority = *priorityPtr;
 				history->push_front(threadData);
 
 				printf("\nPiMutex: suspend higher priority thread");
-				*currentThreadPriorityPtr = 0;	// set its priority to 0
+				*priorityPtr = 0;	// set its priority to 0
 			}
 			else
 				printf("\nPiMutex: ignoring locking attempts from lower priority threads");
@@ -106,7 +106,7 @@ class PiMutex
 		// Unlocks piMutex and restores thread priorities to their original values.
 		// This also resumes suspended priorities (with priority set to 0).
 		//-----------------------------------------------------------------------------------------
-		int unlock(float *currentThreadPriority)
+		int unlock(float *priorityPtr)
 		{
 			int unlockStatus = pthread_mutex_unlock(&piMutex);
 
@@ -134,7 +134,6 @@ class PiMutex
 		pthread_mutex_t piMutex;
 		list<ThreadInfo> *history;
 		float csPriority;
-		float *lockingThreadPriorityPtr;
 };
 
 #endif

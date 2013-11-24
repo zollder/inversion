@@ -12,6 +12,7 @@
 
 #include "PulseTimer.h"
 #include "PiMutex.h"
+#include "PcMutex.h"
 //=============================================================================
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -33,9 +34,10 @@ int active_p = 0;					// detemine the active thread that should be run
 void ThreadManager();
 
 //-----------------------------------------------------------------------------------------
-// Instantiates a "Priority Inheritance" mutex.
+// Instantiates "Priority Inheritance" and "Priority Ceiling" mutexes.
 //-----------------------------------------------------------------------------------------
 PiMutex piMutex;
+PcMutex pcMutex(0.7);
 
 //-----------------------------------------------------------------------------------------
 // Thread 1 (highest priority)
@@ -45,6 +47,7 @@ void * P1(void* arg)
 	int cnt = 0;
 	while(1)
 	{
+		printf("\nP1: lock CPU mutex");
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
@@ -59,15 +62,15 @@ void * P1(void* arg)
 		{
 			// Try to acquire mutex after running for 1 unit
 			printf("\nP1: try CS lock");
-			if (piMutex.lock(&priority[1]) == 16);
-				printf("\nP1: blocked, CS already locked");
+//			piMutex.lock(&priority[1]);		// use PI mutex
+			pcMutex.lock(&priority[1]);		// use PC mutex
 		}
 		else if (cnt == 3)
 		{
 			// Release mutex after running for 3 units
-			printf("\nP1: unlocking semaphore");
-			piMutex.unlock(&priority[1]);
-			printf("\nP1: semaphore unlocked");
+			printf("\nP1: try CS unlock");
+//			piMutex.unlock(&priority[1]);		// use PI mutex
+			pcMutex.unlock(&priority[1]);		// use PC mutex
 		}
 		else if (cnt == 4)
 		{
@@ -77,11 +80,13 @@ void * P1(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[1] = 0;
 
+			printf("\nP1: unlock CPU mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
 		printf("\nP1: executed, cnt: %d", cnt);
 
+		printf("\nP1: unlock CPU mutex");
 		pthread_mutex_unlock(&mutex);
 		cnt++;
 	}
@@ -97,6 +102,7 @@ void * P2(void* arg)
 	int cnt = 0;
 	while(1)
 	{
+		printf("\nP2: lock CPU mutex");
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
@@ -114,11 +120,13 @@ void * P2(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[2] = 0;
 
+			printf("\nP2: unlock CPU mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
 		printf("\nP2: executed, cnt: %d", cnt);
 
+		printf("\nP2: unlock CPU mutex");
 		pthread_mutex_unlock(&mutex);
 		cnt++;
 	}
@@ -134,7 +142,7 @@ void * P3(void* arg)
 	int cnt = 0;
 	while(1)
 	{
-		printf("\nP3: lock mutex");
+		printf("\nP3: lock CPU mutex");
 		pthread_mutex_lock(&mutex);
 
 		// wait for the message from ThreadManager and check if current thread is active
@@ -147,15 +155,15 @@ void * P3(void* arg)
 
 		if (cnt == 1)
 		{
-			printf("\nP3: locking CS");
-			piMutex.lock(&priority[3]);
-			printf("\nP3: CS locked");
+			printf("\nP3: try CS lock");
+//			piMutex.lock(&priority[3]);		// use PI mutex
+			pcMutex.lock(&priority[3]);		// use PC mutex
 		}
 		else if (cnt == 3)
 		{
-			printf("\nP3: unlocking CS");
-			piMutex.unlock(&priority[3]);
-			printf("\nP3: CS unlocked");
+			printf("\nP3: try CS unlock");
+//			piMutex.unlock(&priority[3]);	// use PI mutex
+			pcMutex.unlock(&priority[3]);	// use PC mutex
 		}
 		else if (cnt == 5)
 		{
@@ -164,11 +172,13 @@ void * P3(void* arg)
 			// remove 1st process from the ThreadManager's queue
 			priority[3] = 0;
 
+			printf("\nP3: unlock CPU mutex");
 			pthread_mutex_unlock(&mutex);
 			break;
 		}
 		printf("\nP3: executed, counter: %d", cnt);
 
+		printf("\nP3: unlock CPU mutex");
 		pthread_mutex_unlock(&mutex);
 
 		cnt++;
@@ -215,6 +225,7 @@ int main(void)
 	while(1)
 	{
 		//--------------------------------------------
+		printf("\nScheduler: lock CPU mutex");
 		pthread_mutex_lock(&mutex);
 
 		// release P1 t = 4
@@ -247,6 +258,7 @@ int main(void)
 
 		threadManager();
 
+		printf("\nScheduler: unlock CPU mutex");
 		pthread_mutex_unlock(&mutex);
 
 		// wait for the timer pulse to fire
