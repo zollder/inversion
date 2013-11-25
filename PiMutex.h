@@ -76,7 +76,6 @@ class PiMutex
 					printf("\nPiMutex: update CS priority to: %f", *priorityPtr);
 					csPriority = *priorityPtr;
 				}
-
 			}
 			// if already locked by lower priority thread
 			else if (lockStatus == 16 && csPriority < *priorityPtr)

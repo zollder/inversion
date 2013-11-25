@@ -37,7 +37,7 @@ void ThreadManager();
 // Instantiates "Priority Inheritance" and "Priority Ceiling" mutexes.
 //-----------------------------------------------------------------------------------------
 PiMutex piMutex;
-PcMutex pcMutex(0.7);
+PcMutex pcMutex(0.8);
 
 //-----------------------------------------------------------------------------------------
 // Thread 1 (highest priority)
@@ -210,7 +210,7 @@ void threadManager()
 }
 
 //-----------------------------------------------------------------------------------------
-// Main execution function
+// Main function
 //-----------------------------------------------------------------------------------------
 int main(void)
 {
@@ -224,7 +224,6 @@ int main(void)
 	int cnt = 0;
 	while(1)
 	{
-		//--------------------------------------------
 		printf("\nScheduler: lock CPU mutex");
 		pthread_mutex_lock(&mutex);
 
