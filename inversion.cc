@@ -18,7 +18,9 @@
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
-#define threadCount 10 /* Maximum number of threads*/
+#define threadCount 10	/* Maximum number of threads*/
+#define mtxCount 1		// number of mutexes
+#define eps .005		// priority increment
 
 #define RELEASE_TIME_P1 4
 #define RELEASE_TIME_P2 2
@@ -37,7 +39,7 @@ void ThreadManager();
 // Instantiates "Priority Inheritance" and "Priority Ceiling" mutexes.
 //-----------------------------------------------------------------------------------------
 PiMutex piMutex;
-PcMutex pcMutex(0.8);
+PcMutex pcMutex[mtxCount];
 
 //-----------------------------------------------------------------------------------------
 // Thread 1 (highest priority)
@@ -63,16 +65,16 @@ void * P1(void* arg)
 			// Try to acquire mutex after running for 1 unit
 			printf("\nP1: try CS lock");
 //			piMutex.lock(&priority[1]);		// use PI mutex
-			pcMutex.lock(&priority[1]);		// use PC mutex
+			pcMutex[0].lock(1, priority, pcMutex, mtxCount);		// use PC mutex
 		}
-		else if (cnt == 3)
+		else if (cnt == 2)
 		{
 			// Release mutex after running for 3 units
 			printf("\nP1: try CS unlock");
 //			piMutex.unlock(&priority[1]);		// use PI mutex
-			pcMutex.unlock(&priority[1]);		// use PC mutex
+			pcMutex[0].unlock(&priority[1]);		// use PC mutex
 		}
-		else if (cnt == 4)
+		else if (cnt == 3)
 		{
 			// Terminate after 4 units
 			printf("\nP1: thread execution completed");
@@ -157,13 +159,13 @@ void * P3(void* arg)
 		{
 			printf("\nP3: try CS lock");
 //			piMutex.lock(&priority[3]);		// use PI mutex
-			pcMutex.lock(&priority[3]);		// use PC mutex
+			pcMutex[0].lock(3, priority, pcMutex, mtxCount);		// use PC mutex
 		}
 		else if (cnt == 3)
 		{
 			printf("\nP3: try CS unlock");
 //			piMutex.unlock(&priority[3]);	// use PI mutex
-			pcMutex.unlock(&priority[3]);	// use PC mutex
+			pcMutex[0].unlock(&priority[3]);	// use PC mutex
 		}
 		else if (cnt == 5)
 		{
@@ -217,6 +219,9 @@ int main(void)
 	// initialize threads
 	pthread_t P1_ID, P2_ID, P3_ID;
 
+	// define CS priorities (based on static analysis)
+	pcMutex[0].setCsPriority(PRIORITY_P1);
+
 	// create and start periodic timer to generate pulses every second.
 	PulseTimer* timer = new PulseTimer(1);
 	timer->start();
@@ -262,7 +267,7 @@ int main(void)
 
 		// wait for the timer pulse to fire
 		timer->wait();
-		printf("\n\n timer tick: %d\n", cnt);
+		printf("\n\n timer tick: %d\n", cnt+1);
 
 		cnt++;
 	}
