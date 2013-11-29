@@ -65,14 +65,14 @@ void * P1(void* arg)
 //			piMutex.lock(&priority[1]);		// use PI mutex
 			pcMutex.lock(&priority[1]);		// use PC mutex
 		}
-		else if (cnt == 3)
+		else if (cnt == 2)
 		{
 			// Release mutex after running for 3 units
 			printf("\nP1: try CS unlock");
 //			piMutex.unlock(&priority[1]);		// use PI mutex
 			pcMutex.unlock(&priority[1]);		// use PC mutex
 		}
-		else if (cnt == 4)
+		else if (cnt == 3)
 		{
 			// Terminate after 4 units
 			printf("\nP1: thread execution completed");
@@ -262,7 +262,7 @@ int main(void)
 
 		// wait for the timer pulse to fire
 		timer->wait();
-		printf("\n\n timer tick: %d\n", cnt);
+		printf("\n\n timer tick: %d\n", cnt+1);
 
 		cnt++;
 	}
