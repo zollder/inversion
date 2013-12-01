@@ -1,0 +1,324 @@
+Initializing piMutex ...
+Initializing piMutex ...
+Initializing pcMutex ...
+Initializing pcMutex ...
+Creating and initializing PulseTimer ...
+Channel successfully created 
+Connection attached successfully 
+Timer created successfully 
+Timer started 
+
+Scheduler: lock CPU mutex
+P2 released
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+P2: resumed, executing, cnt: 1
+P2: executed, cnt: 1
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+
+ timer tick: 0
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 2
+P2: try to lock CS2
+PcMutex: locking CS2, thread 2
+PcMutex: saving thread 2 state
+PcMutex: creating thread 2 data holder
+P2: executed, cnt: 2
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+
+ timer tick: 1
+
+Scheduler: lock CPU mutex
+P1 released
+P1: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: suspended, priority: 0.70
+P1: resumed, executing, cnt: 1
+P1: try to lock CS1
+PcMutex: saving thread 2 state on target CS2
+PcMutex: creating thread 1 data holder
+PcMutex: transferring priority 0.70 to thread 2
+PcMutex: suspend thread 1
+P1: executed, cnt: 1
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.00
+
+ timer tick: 2
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 3
+P2: try to lock CS1
+PcMutex: locking CS1, thread 2
+PcMutex: saving thread 2 state
+PcMutex: creating thread 2 data holder
+P2: executed, cnt: 3
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.70
+
+ timer tick: 3
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 4
+P2: try to unlock CS1
+PcMutex: unlocking CS1, recovering priorities, resuming suspended threads
+PcMutex: recovering thread 2 priority to 0.70
+PcMutex: resetting CS locked status
+P2: executed, cnt: 4
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.70
+
+ timer tick: 4
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 5
+P2: try to unlock CS2
+PcMutex: unlocking CS2, recovering priorities, resuming suspended threads
+PcMutex: recovering thread 1 priority to 0.70
+PcMutex: recovering thread 2 priority to 0.50
+PcMutex: resetting CS locked status
+P2: executed, cnt: 5
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+
+ timer tick: 5
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 2
+P1: try to lock CS2
+PcMutex: locking CS2, thread 1
+PcMutex: saving thread 1 state
+PcMutex: creating thread 1 data holder
+P1: executed, cnt: 2
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.70
+
+ timer tick: 6
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 3
+P1: try to unlock CS2
+PcMutex: unlocking CS2, recovering priorities, resuming suspended threads
+PcMutex: recovering thread 1 priority to 0.70
+PcMutex: resetting CS locked status
+P1: executed, cnt: 3
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.70
+
+ timer tick: 7
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 4
+P1: try to unlock CS1
+PcMutex: ERROR UNLOCKING MUTEX
+P1: executed, cnt: 4
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.70
+
+ timer tick: 8
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 5
+P1: executed, cnt: 5
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.70
+
+ timer tick: 9
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 6
+P1: thread execution completed
+P1: unlock CPU mutex
+
+ timer tick: 10
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 6
+P2: thread execution completed
+P2: unlock CPU mutex
+
+ timer tick: 11
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 12
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 13
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 14
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 15
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 16
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 17
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 18
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 19
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 20
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 21
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 22
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 23
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 24
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 25
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 26
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 27
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 28
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+
+ timer tick: 29
+
+Scheduler: lock CPU mutex
+
+30 seconds are over, terminate program
+
+Destroying PulseTimer ...
+Destroying pcMutex ...
+Destroying pcMutex ...
+Destroying piMutex ...
+Destroying piMutex ...
+

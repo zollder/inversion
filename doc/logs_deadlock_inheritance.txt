@@ -1,0 +1,97 @@
+Initializing piMutex ...
+Initializing piMutex ...
+Initializing pcMutex ...
+Initializing pcMutex ...
+Creating and initializing PulseTimer ...
+Channel successfully created 
+Connection attached successfully 
+Timer created successfully 
+Timer started 
+
+Scheduler: lock CPU mutex
+P2 released
+P2: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: suspended, priority: 0.50
+P2: resumed, executing, cnt: 1
+P2: executed, cnt: 1
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+
+ timer tick: 0
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 2
+P2: try to lock CS2
+PiMutex: locking CS
+PiMutex: update CS priority to: 0.50
+P2: executed, cnt: 2
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.50
+
+ timer tick: 1
+
+Scheduler: lock CPU mutex
+P1 released
+P1: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: suspended, priority: 0.70
+P1: resumed, executing, cnt: 1
+P1: try to lock CS1
+PiMutex: locking CS
+PiMutex: update CS priority to: 0.70
+P1: executed, cnt: 1
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.70
+
+ timer tick: 2
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 1
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P1: resumed, executing, cnt: 2
+P1: try to lock CS2
+PiMutex: CS already locked, inherit priority: 0.70
+PiMutex: suspend higher priority thread
+P1: executed, cnt: 2
+P1: unlock CPU mutex
+P1: lock CPU mutex
+P1: suspended, priority: 0.00
+
+ timer tick: 3
+
+Scheduler: lock CPU mutex
+Thread manager: activate thread 2
+Thread manager: notify threads
+Scheduler: unlock CPU mutex
+P2: resumed, executing, cnt: 3
+P2: try to lock CS1
+PiMutex: deadlock occurred
+P2: executed, cnt: 3
+P2: unlock CPU mutex
+P2: lock CPU mutex
+P2: suspended, priority: 0.70
+
+ timer tick: 4
+
+Scheduler: deadlock occurred, stop execution
+
+Destroying PulseTimer ...
+Destroying pcMutex ...
+Destroying pcMutex ...
+Destroying piMutex ...
+Error destroying piMutex
+Destroying piMutex ...
+Error destroying piMutex
+
