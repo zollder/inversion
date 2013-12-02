@@ -21,7 +21,7 @@ P2: unlock CPU mutex
 P2: lock CPU mutex
 P2: suspended, priority: 0.50
 
- timer tick: 0
+ timer tick: 1
 
 Scheduler: lock CPU mutex
 Thread manager: activate thread 2
@@ -36,7 +36,7 @@ P2: unlock CPU mutex
 P2: lock CPU mutex
 P2: suspended, priority: 0.50
 
- timer tick: 1
+ timer tick: 2
 
 Scheduler: lock CPU mutex
 P1 released
@@ -54,7 +54,7 @@ P1: unlock CPU mutex
 P1: lock CPU mutex
 P1: suspended, priority: 0.70
 
- timer tick: 2
+ timer tick: 3
 
 Scheduler: lock CPU mutex
 Thread manager: activate thread 1
@@ -69,7 +69,7 @@ P1: unlock CPU mutex
 P1: lock CPU mutex
 P1: suspended, priority: 0.00
 
- timer tick: 3
+ timer tick: 4
 
 Scheduler: lock CPU mutex
 Thread manager: activate thread 2
@@ -83,7 +83,7 @@ P2: unlock CPU mutex
 P2: lock CPU mutex
 P2: suspended, priority: 0.70
 
- timer tick: 4
+ timer tick: 5
 
 Scheduler: deadlock occurred, stop execution
 

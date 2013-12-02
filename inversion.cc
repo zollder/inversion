@@ -64,15 +64,15 @@ void * P1(void* arg)
 		{
 			// Try to acquire mutex after running for 1 unit
 			printf("\nP1: try CS lock");
-			piMutex.lock(&priority[1]);		// use PI mutex
-//			pcMutex[0].lock(1, priority, pcMutex, mtxCount);		// use PC mutex
+//			piMutex.lock(&priority[1]);		// use PI mutex
+			pcMutex[0].lock(1, priority, pcMutex, mtxCount);		// use PC mutex
 		}
 		else if (cnt == 2)
 		{
 			// Release mutex after running for 3 units
 			printf("\nP1: try CS unlock");
-			piMutex.unlock(&priority[1]);		// use PI mutex
-//			pcMutex[0].unlock();		// use PC mutex
+//			piMutex.unlock(&priority[1]);		// use PI mutex
+			pcMutex[0].unlock();		// use PC mutex
 		}
 		else if (cnt == 3)
 		{
@@ -158,14 +158,14 @@ void * P3(void* arg)
 		if (cnt == 1)
 		{
 			printf("\nP3: try CS lock");
-			piMutex.lock(&priority[3]);		// use PI mutex
-//			pcMutex[0].lock(3, priority, pcMutex, mtxCount);		// use PC mutex
+//			piMutex.lock(&priority[3]);		// use PI mutex
+			pcMutex[0].lock(3, priority, pcMutex, mtxCount);		// use PC mutex
 		}
 		else if (cnt == 3)
 		{
 			printf("\nP3: try CS unlock");
-			piMutex.unlock(&priority[3]);	// use PI mutex
-//			pcMutex[0].unlock();	// use PC mutex
+//			piMutex.unlock(&priority[3]);	// use PI mutex
+			pcMutex[0].unlock();	// use PC mutex
 		}
 		else if (cnt == 5)
 		{
